@@ -1,53 +1,66 @@
 ﻿
 $(function () {
-    //Attaching DOM element to varibles
-    var $tasksList = $("#tasksList");
-    var $taskInput = $("#taskInput");
-    var $notification = $("#notification");
+    var $gorevListesi = $("#tasksList");
+    var $gorevInput= $("#taskInput");
+    var $bildirim = $("#notification");
 
-    //Counting amount of items in the list
-    //To display or hide notification
-    var displayNotification = function () {
-        if (!$tasksList.children().length) {
-            //$notification.css("display", "block");
-            $notification.fadeIn("fast");
-        } else {
-            $notification.css("display", "none")
+    $.ajax({
+        type: "GET",
+        dataType: 'json',
+        url: 'TaskData/GetTaskData',
+        success: function (data) {
+            data.responseText.forEach((item) => {
+                $gorevListesi.append("<li>" + item.GorevAciklama + "<button class='delete'>&#10006</button></li>");
+                bildirimGizle();
+                $(".delete").on("click", function () {
+
+                    var $parent = $(this).parent();
+
+                    $parent.css("animation", "fadeOut .3s linear");
+
+                    setTimeout(function () {
+                        $parent.remove();
+                        bildirimGizle();
+                    }, 295);
+
+                })
+            })
+        },
+        error: function (response) {
+            console.log(response)
         }
-    }
+    })
 
-    //Attaching event handler to the add button
+
+    var bildirimGizle = function () {
+            if (!$gorevListesi.children().length) {
+                $bildirim.fadeIn("fast");
+            } else {
+                $bildirim.css("display", "none")
+            }
+        }
+
     $("#taskAdd").on("click", function () {
 
-        //Returning false if the input is empty
-        if (!$taskInput.val()) { return false; }
+            if (!$gorevInput.val()) { return false; }
 
-        //Appending li with the input value
-        $tasksList.append("<li>" + $taskInput.val() + "<button class='delete'>&#10006</button></li>");
+            $gorevListesi.append("<li>" + $gorevInput.val() + "<button class='delete'>&#10006</button></li>");
 
-        //Cleaning input after add event
-        $taskInput.val("");
+            $gorevInput.val("");
 
-        //Display/Hide Notification
-        displayNotification();
+            bildirimGizle();
 
-        //Attaching even handler to the delete button
-        $(".delete").on("click", function () {
+            $(".delete").on("click", function () {
 
-            //Assigning "this" to varible, as it doesn't
-            //work correctly with setTimeout() function
-            var $parent = $(this).parent();
+                var $parent = $(this).parent();
 
-            //Displaying CSS animation
-            $parent.css("animation", "fadeOut .3s linear");
+                $parent.css("animation", "fadeOut .3s linear");
 
-            //Timeout on remove function
-            setTimeout(function () {
-                $parent.remove();
-                displayNotification();
-            }, 295);
+                setTimeout(function () {
+                    $parent.remove();
+                    bildirimGizle();
+                }, 295);
 
+            })
         })
-    })
-});
-
+    });
